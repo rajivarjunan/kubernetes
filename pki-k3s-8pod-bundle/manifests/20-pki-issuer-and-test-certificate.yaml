@@ -1,0 +1,40 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: step-ca-acme
+spec:
+  acme:
+    email: admin@example.invalid
+    server: https://step-ca.pki.svc.cluster.local:9000/acme/k3s-acme/directory
+    privateKeySecretRef:
+      name: step-ca-acme-account
+    caBundle: REPLACE_WITH_BASE64_ROOT_CA_CERT
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: traefik
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pki-test
+  namespace: pki
+spec:
+  secretName: pki-test-tls
+  commonName: example.home.arpa
+  dnsNames:
+    - example.home.arpa
+  duration: 24h
+  renewBefore: 8h
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+  issuerRef:
+    name: step-ca-acme
+    kind: ClusterIssuer
+    group: cert-manager.io

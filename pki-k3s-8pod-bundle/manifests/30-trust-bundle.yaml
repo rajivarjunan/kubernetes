@@ -1,0 +1,16 @@
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+  name: lab-ca-bundle
+spec:
+  sources:
+    - secret:
+        name: step-ca-secrets
+        key: root_ca.crt
+        namespace: pki
+  target:
+    configMap:
+      key: ca-bundle.pem
+    namespaceSelector:
+      matchLabels:
+        pki-trust: enabled
